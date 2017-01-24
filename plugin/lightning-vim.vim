@@ -22,33 +22,66 @@ endfunction
 " Detection {{{1
 
 function! LightningDetect(...) abort
+  echom "A"
   if exists('b:lightning_root')
     return 1
   endif
-"  let fn = fnamemodify(a:0 ? a:1 : expand('%'), ':p')
-"  if fn =~# ':[\/]\{2\}'
-"    return 0
-"  endif
-"  if !isdirectory(fn)
-"    let fn = fnamemodify(fn, ':h')
-"  endif
-  let file = findfile('appConfig.json', ".")
-  let temp = isdirectory(fnamemodify(file, ':p:h') . '/pkg')
+
+  let fn = fnamemodify(a:0 ? a:1 : expand('%'), ':p')
+  if fn =~# ':[\/]\{2\}'
+    return 0
+  endif
+
+  echom fn
+  if !isdirectory(fn)
+    let fn = fnamemodify(fn, ':h')
+  endif
+
+  let file = findfile('appConfig.json', escape(fn, ', ').';')
+  echom file
   if !empty(file) && isdirectory(fnamemodify(file, ':p:h') . '/pkg')
     let b:lightning_root = fnamemodify(file, ':p:h')
     return 1
   endif
+"  let file = findfile('appConfig.json', ".")
+"  let temp = isdirectory(fnamemodify(file, ':p:h') . '/pkg')
+"  if !empty(file) && isdirectory(fnamemodify(file, ':p:h') . '/pkg')
+"    let b:lightning_root = fnamemodify(file, ':p:h')
+"    return 1
+"  endif
 endfunction
 
 function! s:change_to_controller(path)
   let curdir = expand(a:path .':p:h')
   let curfile = expand(a:path . ':t:r')
-  echo curfile
 endfunction
 
-if LightningDetect()
+function! s:lightning_setup()
   command! -bang -buffer -nargs=0 Rcontroller call s:change_to_controller('%')
-endif
+endfunction
+
+augroup lightningPluginDetect
+  autocmd!
+  autocmd BufNewFile call s:lightning_setup
+  autocmd BufReadPost * call s:lightning_setup()
+  autocmd VimEnter * call s:lightning_setup()
+
+call s:lightning_setup()
+
+"augroup lightningPluginDetect
+"  autocmd!
+"  autocmd BufNewFile, BufReadPost * 
+"    \ echom 'BufNewFile, BufReadPost' |
+"    \ if LightningDetect('<afile>')  |
+"    \   echom 'LightningDetected' |
+"    \  call s:lightning_setup()  |
+"    \ endif
+"
+"  autocmd VimEnter *
+"    \ echom 'VimEnter'
+"
+"augroup END
+
 
 
 " }}}1
