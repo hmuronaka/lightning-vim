@@ -60,7 +60,7 @@ endfunction
 
 function! s:change_to_controller(path)
   let controller_file = s:controller_path(a:path)
-  echo controller_file
+  exe 'edit ' . controller_file
 endfunction
 
 function! s:lightning_setup()
