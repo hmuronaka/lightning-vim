@@ -51,9 +51,16 @@ function! LightningDetect(...) abort
 "  endif
 endfunction
 
+function! s:controller_path(path)
+  let dir_path = expand(a:path .':h')
+  let dir_name = fnamemodify(dir_path, ':t')
+  let controller_file =  dir_path . '/' . dir_name . 'Controller.js'
+  return controller_file
+endfunction
+
 function! s:change_to_controller(path)
-  let curdir = expand(a:path .':p:h')
-  let curfile = expand(a:path . ':t:r')
+  let controller_file = s:controller_path(a:path)
+  echo controller_file
 endfunction
 
 function! s:lightning_setup()
