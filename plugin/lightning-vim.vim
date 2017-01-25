@@ -4,10 +4,10 @@
 
 " Install this file as plugin/lightning-vim.vim.
 
-if exists('g:loaded_lightning') || &cp || v:version < 700
-  finish
-endif
-let g:loaded_lightning = 1
+"if exists('g:loaded_lightning') || &cp || v:version < 700
+"  finish
+"endif
+"let g:loaded_lightning = 1
 
 " Utility Functions {{{1
 
@@ -51,20 +51,24 @@ function! LightningDetect(...) abort
 "  endif
 endfunction
 
-function! s:controller_path(path)
-  let dir_path = expand(a:path .':h')
-  let dir_name = fnamemodify(dir_path, ':t')
-  let controller_file =  dir_path . '/' . dir_name . 'Controller.js'
-  return controller_file
+function! s:aura_component_path(path, suffix)
+  let dirname = expand(a:path . ':h')
+  let dirname = fnamemodify(dirname, ':t')
+  let curdir = expand(a:path .':p:h')
+  let aura_component_path = curdir . '/' . dirname . a:suffix
+  return aura_component_path
 endfunction
 
-function! s:change_to_controller(path)
-  let controller_file = s:controller_path(a:path)
-  exe 'edit ' . controller_file
+function! s:change_to(path, target)
+  let controller_path = s:aura_component_path(a:path, a:target)
+  exe 'edit ' . controller_path
 endfunction
 
 function! s:lightning_setup()
-  command! -bang -buffer -nargs=0 Rcontroller call s:change_to_controller('%')
+  command! -bang -buffer -nargs=0 Rcontroller call s:change_to('%', 'Controller.js')
+  command! -bang -buffer -nargs=0 Rcss call s:change_to('%', '.css')
+  command! -bang -buffer -nargs=0 Rhelper call s:change_to('%', 'Helper.js')
+  command! -bang -buffer -nargs=0 Rcmp call s:change_to('%', '.cmp')
 endfunction
 
 augroup lightningPluginDetect
