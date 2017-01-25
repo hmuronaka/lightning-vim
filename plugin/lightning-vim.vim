@@ -65,26 +65,33 @@ function! s:change_to(path, target)
 endfunction
 
 function! s:get_apex_controller_name(cmp_path)
-  for line in readfile(cmp_path, '', 10)
-    if line =~ 
+  let pattern = 'controller\s*=\s*"\(.\+\)"'
+  for line in readfile(a:cmp_path, '', 10)
+    let name = matchstr(line, pattern)
+    if !empty(name)
+      return name
+    endif
   endfor
-
-
+  return ''
 endfunction
 
 function! s:change_to_apex(path)
   "当該cmpの存在チェック
   let cmp_path = s:aura_component_path(a:path, '.cmp')
-  let file = findfile(comp_path, '.')
+  let file = findfile(cmp_path, '.')
   if empty(file)
     return 0
   endif
 
   "cmp読み込み
   "controller="class名"をチェック
-  let apex_controller_name = s:get_apex_controller_name(comp_path)
+  let apex_controller_name = s:get_apex_controller_name(cmp_path)
+  if empty(apex_controller_name)
+    return 0
+  endif
   
   "ヒットしたら、そのクラス名のファイルに遷移する
+  echo apex_controller_name
 endfunction
 
 function! s:lightning_setup()
