@@ -64,12 +64,36 @@ function! s:change_to(path, target)
   exe 'edit ' . controller_path
 endfunction
 
+function! s:get_apex_controller_name(cmp_path)
+  for line in readfile(cmp_path, '', 10)
+    if line =~ 
+  endfor
+
+
+endfunction
+
+function! s:change_to_apex(path)
+  "当該cmpの存在チェック
+  let cmp_path = s:aura_component_path(a:path, '.cmp')
+  let file = findfile(comp_path, '.')
+  if empty(file)
+    return 0
+  endif
+
+  "cmp読み込み
+  "controller="class名"をチェック
+  let apex_controller_name = s:get_apex_controller_name(comp_path)
+  
+  "ヒットしたら、そのクラス名のファイルに遷移する
+endfunction
+
 function! s:lightning_setup()
   command! -bang -buffer -nargs=0 Rcontroller call s:change_to('%', 'Controller.js')
   command! -bang -buffer -nargs=0 Rcss call s:change_to('%', '.css')
   command! -bang -buffer -nargs=0 Rhelper call s:change_to('%', 'Helper.js')
   command! -bang -buffer -nargs=0 Rcmp call s:change_to('%', '.cmp')
   command! -bang -buffer -nargs=0 Rrender call s:change_to('%', 'Renderer.js')
+  command! -bang -buffer -nargs=0 Rapex call s:change_to_apex('%')
 endfunction
 
 augroup lightningPluginDetect
