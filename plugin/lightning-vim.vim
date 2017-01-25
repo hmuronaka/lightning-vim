@@ -69,6 +69,7 @@ function! s:lightning_setup()
   command! -bang -buffer -nargs=0 Rcss call s:change_to('%', '.css')
   command! -bang -buffer -nargs=0 Rhelper call s:change_to('%', 'Helper.js')
   command! -bang -buffer -nargs=0 Rcmp call s:change_to('%', '.cmp')
+  command! -bang -buffer -nargs=0 Rrender call s:change_to('%', 'Renderer.js')
 endfunction
 
 augroup lightningPluginDetect
