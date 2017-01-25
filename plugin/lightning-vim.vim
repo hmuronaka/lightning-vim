@@ -65,7 +65,7 @@ function! s:change_to(path, target)
 endfunction
 
 function! s:get_apex_controller_name(cmp_path)
-  let pattern = 'controller\s*=\s*"\(.\+\)"'
+  let pattern = 'controller\s*=\s*"\zs\(.\+\)\ze"'
   for line in readfile(a:cmp_path, '', 10)
     let name = matchstr(line, pattern)
     if !empty(name)
@@ -92,6 +92,8 @@ function! s:change_to_apex(path)
   
   "ヒットしたら、そのクラス名のファイルに遷移する
   echo apex_controller_name
+  let apex_controller_path = 'pkg/class/' . apex_controller_name . '.cls'
+  exe 'edit ' . apex_controller_path
 endfunction
 
 function! s:lightning_setup()
