@@ -52,16 +52,27 @@ function! LightningDetect(...) abort
 endfunction
 
 function! s:aura_component_path(path, suffix)
-  let dirname = expand(a:path . ':h')
-  let dirname = fnamemodify(dirname, ':t')
-  let curdir = expand(a:path .':p:h')
-  let aura_component_path = curdir . '/' . dirname . a:suffix
-  return aura_component_path
+  if s:is_lightning_directory(expand(a:path), 'pkg/aura/')
+    let dirname = expand(a:path . ':h')
+    let dirname = fnamemodify(dirname, ':t')
+    let curdir = expand(a:path .':p:h')
+    let aura_component_path = curdir . '/' . dirname . a:suffix
+    return aura_component_path
+  elseif s:is_lightning_directory(expand(a:path), 'pkg/classes/')
+  endif
+  return ''
 endfunction
 
 function! s:change_to(path, target)
   let controller_path = s:aura_component_path(a:path, a:target)
-  exe 'edit ' . controller_path
+  if filereadable(controller_path)
+    exe 'edit ' . controller_path
+  endif
+endfunction
+
+" pathが'pkg/aura/'など内のパスかどうか
+function! s:is_lightning_directory(path, target)
+  return stridx(a:path, a:target) == 0
 endfunction
 
 function! s:get_apex_controller_name(cmp_path)
