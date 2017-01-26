@@ -65,7 +65,7 @@ function! s:change_to(path, target)
 endfunction
 
 function! s:get_apex_controller_name(cmp_path)
-  let pattern = 'controller\s*=\s*"\zs\(.\+\)\ze"'
+  let pattern = 'controller\s*=\s*"[^\.]*.\?\zs\(.\+\)\ze"'
   for line in readfile(a:cmp_path, '', 10)
     let name = matchstr(line, pattern)
     if !empty(name)
