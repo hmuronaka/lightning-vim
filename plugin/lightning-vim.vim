@@ -92,7 +92,7 @@ function! s:change_to_apex(path)
   
   "ヒットしたら、そのクラス名のファイルに遷移する
   echo apex_controller_name
-  let apex_controller_path = 'pkg/class/' . apex_controller_name . '.cls'
+  let apex_controller_path = 'pkg/classes/' . apex_controller_name . '.cls'
   exe 'edit ' . apex_controller_path
 endfunction
 
