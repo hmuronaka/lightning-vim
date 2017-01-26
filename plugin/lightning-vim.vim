@@ -51,6 +51,20 @@ function! LightningDetect(...) abort
 "  endif
 endfunction
 
+" apexのcontrollerからlightningコンポーネントのベースパスを探す
+function! s:search_aura_dir(controller_name)
+  let base_aura_path = 'pkg/aura/**/*.cmp'
+  " auraの各パスの*.cmpを探索する
+  let filelist = glob(base_aura_path)
+  let splitted = split(filelist, '\n')
+  for file in splitted
+    let cmp_controller_name = s:get_apex_controller_name(file)
+    if !empty(cmp_controller_name)
+      echom file . ', ' . cmp_controller_name
+    endif
+  endfor
+endfunction
+
 function! s:aura_component_path(path, suffix)
   if s:is_lightning_directory(expand(a:path), 'pkg/aura/')
     let dirname = expand(a:path . ':h')
@@ -59,6 +73,7 @@ function! s:aura_component_path(path, suffix)
     let aura_component_path = curdir . '/' . dirname . a:suffix
     return aura_component_path
   elseif s:is_lightning_directory(expand(a:path), 'pkg/classes/')
+    "call s:search_aura_dir('test')
   endif
   return ''
 endfunction
