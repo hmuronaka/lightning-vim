@@ -106,6 +106,11 @@ function! s:get_apex_controller_name(cmp_path)
   return ''
 endfunction
 
+function! s:get_apex_controller_path(apex_controller_name)
+  let apex_controller_path = 'pkg/classes/' . a:apex_controller_name . '.cls'
+  return apex_controller_path
+endfunction
+
 function! s:change_to_apex(path)
   "当該cmpの存在チェック
   let cmp_path = s:aura_component_path(a:path, '.cmp')
@@ -123,7 +128,7 @@ function! s:change_to_apex(path)
   
   "ヒットしたら、そのクラス名のファイルに遷移する
   echo apex_controller_name
-  let apex_controller_path = 'pkg/classes/' . apex_controller_name . '.cls'
+  let apex_controller_path = s:get_apex_controller_path(apex_controller_name)
   exe 'edit ' . apex_controller_path
 endfunction
 
@@ -131,8 +136,13 @@ function! s:Jump_to_declaration(path) abort
   if s:endswith(expand(a:path), '.cmp')
     echom 'Jump_to_declaration'
     call s:jump_from_cmp(a:path)
+  elseif s:endswith(expand(a:path), '.Controller.js')
+    call s:jump_from_js_controller(a:path)
   endif
 endfunction
+
+""""""""""""""""""""""""""""""""""""""""
+" jump_fromp_cmp
 
 function! s:jump_from_cmp(path) abort
   let line = getline('.')
@@ -167,6 +177,49 @@ function! s:pos_of_js_method_declaration(controller_path, method_name)
   endfor
   return -1
 endfunction
+
+""""""""""""""""""""""""""""""""""""""""
+" jump_from_js_controller
+
+function! s:jump_from_js_controller(path) abort
+  let line = getline('.')
+  let method_name = matchstr(line, '"c\.\zs.*\ze"')
+  if !empty(method_name)
+    call s:jump_to_apex_controller(expand(a:path), method_name)
+  else
+"    let method_name = matchstr(line, 'helper\.\zs.*\ze\s*\(')
+"    if !empty(method_name)
+"      call s:jump_to_helper(a:path, method_name)
+"    endif
+  endif
+endfunction
+
+function! s:jump_to_apex_controller(path, method_name)
+  let apex_controller_name = s:get_apex_controller_name(path)
+  let apex_controller_path = s:get_apex_controller_path(apex_controller_name)
+  let line_num = s:line_of_apex_method_declaration(apex_controller_path, method_name)
+  exe 'edit ' . apex_controller_path
+
+  if line_num != -1
+    exe line_num
+  endif
+endfunction
+
+function! s:line_of_apex_method_declaration(apex_path, method_name)
+  let pattern = '\s*' . method_name . '\s*\(.*\)\s*$'
+  let line_num = -1
+  for line in readfile(a:apex_path, '')
+    let name = matchstr(line, pattern)
+    if !empty(name)
+      return line_num
+    endif
+    let line_num += 1
+  endfor
+  return -1
+endfunction
+
+
+
 
 function! s:lightning_setup()
   command! -bang -buffer -nargs=0 Rcontroller call s:change_to('%', 'Controller.js')
