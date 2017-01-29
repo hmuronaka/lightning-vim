@@ -149,9 +149,6 @@ function! s:jump_to_js_controller(path, method_name) abort
   let linenum = s:pos_of_js_method_declaration(controller_path, a:method_name)
   echom 'linenum: ' . linenum
   exe 'edit ' . controller_path
-  if linenum != -1
-    exe linenum
-  endif
   " move line num
 endfunction
 
