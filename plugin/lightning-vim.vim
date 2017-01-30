@@ -134,7 +134,7 @@ endfunction
 
 function! s:Jump_to_declaration(path) abort
   if s:endswith(expand(a:path), '.cmp')
-    echom 'Jump_to_declaration'
+    "echom 'Jump_to_declaration'
     call s:jump_from_cmp(a:path)
   elseif s:endswith(expand(a:path), '.Controller.js')
     call s:jump_from_js_controller(a:path)
@@ -146,7 +146,7 @@ endfunction
 
 function! s:jump_from_cmp(path) abort
   let line = getline('.')
-  let method_name = matchstr(line, '"c\.\zs.*\ze"')
+  let method_name = matchstr(line, '{!c\.\zs.*\ze}')
   if !empty(method_name)
     echom 'method_name: ' . method_name
     call s:jump_to_js_controller(a:path, method_name)
@@ -155,17 +155,20 @@ endfunction
 
 function! s:jump_to_js_controller(path, method_name) abort
   let controller_path = s:aura_component_path(a:path, 'Controller.js')
-  echom 'controller_path: ' . controller_path
+  "echom 'controller_path: ' . controller_path
   let linenum = s:pos_of_js_method_declaration(controller_path, a:method_name)
-  echom 'linenum: ' . linenum
-  exe 'edit ' . controller_path
+  "echom 'linenum: ' . linenum
+  
   if linenum != -1
-    exe linenum
+    exe 'edit +' . linenum . ' ' . controller_path
+  else
+    exe 'edit ' . controller_path
   endif
   " move line num
 endfunction
 
 function! s:pos_of_js_method_declaration(controller_path, method_name)
+  "echom a:method_name
   let pattern = '^\s*' . a:method_name . '\s*\:\s*function'
   let line_num = 1
   for line in readfile(a:controller_path, '')
