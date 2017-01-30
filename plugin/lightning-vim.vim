@@ -96,7 +96,7 @@ function! s:is_lightning_directory(path, target)
 endfunction
 
 function! s:get_apex_controller_name(cmp_path)
-  let pattern = 'controller\s*=\s*"[^\.]*.\?\zs\(.\+\)\ze"'
+  let pattern = 'controller\s*=\s*"\%([^\.]\.\)\@<!\zs\([^\.]\+\)\ze"'
   for line in readfile(a:cmp_path, '', 10)
     let name = matchstr(line, pattern)
     if !empty(name)
@@ -190,10 +190,11 @@ function! s:jump_from_js_controller(path) abort
   if !empty(method_name)
     call s:jump_to_apex_controller(expand(a:path), method_name)
   else
-"    let method_name = matchstr(line, 'helper\.\zs.*\ze\s*\(')
-"    if !empty(method_name)
-"      call s:jump_to_helper(a:path, method_name)
-"    endif
+    let method_name = matchstr(line, 'helper\.\zs.*\ze\s*\(')
+    echom 'helper.method_name: ' . method_name
+    if !empty(method_name)
+      call s:jump_to_helper(expand(a:path), method_name)
+    endif
   endif
 endfunction
 
@@ -219,6 +220,16 @@ function! s:line_of_apex_method_declaration(apex_path, method_name)
     let line_num += 1
   endfor
   return -1
+endfunction
+
+function! s:jump_to_helper(path, method_name)
+  let helper_path = s:aura_component_path(a:path, 'Helper.js')
+  let line_num = s:pos_of_js_method_declaration(helper_path, a:method_name)
+  if line_num != -1
+    exe 'edit +' . line_num . ' ' . helper_path
+  else
+    exe 'edit ' . helper_path
+  endif
 endfunction
 
 
