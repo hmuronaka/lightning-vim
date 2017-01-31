@@ -239,8 +239,8 @@ function! s:jump_from_js_controller(path) abort
   if !empty(method_name)
     call s:jump_to_apex_controller(a:path, method_name)
   else
-    let method_name = s:matchstr_in_cursor(line, 'helper\.\zs.*\ze(')
-    "echom 'helper.method_name: ' . method_name
+    let method_name = s:matchstr_in_cursor(line, 'helper\.\zs[a-zA-Z0-9_]\+\ze')
+    echom 'helper.method_name: ' . method_name
     if !empty(method_name)
       call s:jump_to_helper(a:path, method_name)
     endif
