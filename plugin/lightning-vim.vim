@@ -265,8 +265,8 @@ function! s:jump_to_apex_controller(path, method_name)
 endfunction
 
 function! s:line_of_apex_method_declaration(apex_path, method_name)
-  let pattern = '\s*' . a:method_name . '\s*\(.*\)\s*$'
-  let line_num = -1
+  let pattern = '\s*' . a:method_name . '\s*\(.*\)\s*{\?\s*$'
+  let line_num = 1
   for line in readfile(a:apex_path, '')
     let name = matchstr(line, pattern)
     if !empty(name)
