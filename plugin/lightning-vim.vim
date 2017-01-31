@@ -214,7 +214,7 @@ endfunction
 function! s:pos_of_cmp_attribute_declaration(cmp_path, attribute_name)
   echom 's:pos_of_cmp_attribute_declaration(cmp_path, attribute_name): ' . a:attribute_name
 
-  let pattern ='aura:attribute\s+.*name\s*=\s*"' . a:attribute_name . '".*'
+  let pattern ='aura:attribute\s\+.*\%(name\)\s*=\s*"' . a:attribute_name . '".*'
   let line_num = 1
   for line in readfile(a:cmp_path, '')
     let name = matchstr(line, pattern)
