@@ -96,8 +96,10 @@ function! s:is_lightning_directory(path, target)
 endfunction
 
 function! s:get_apex_controller_name(cmp_path)
-  let pattern1 = 'controller\s*=\s*"[^\.]\+\.\zs\(.\+\)\ze"'
-  let pattern2 = 'controller\s*=\s*"\zs\(.\+\)\ze"'   
+  echom 's:get_apex_controller_name(cmp_path) cmp_path: ' . a:cmp_path
+
+  let pattern1 = 'controller\s*=\s*"[a-zA-Z0-9_]\+\.\zs[a-zA-Z0-9_]\+\ze"'
+  let pattern2 = 'controller\s*=\s*"\zs[a-zA-Z0-9_]\+\ze"'   
   for line in readfile(a:cmp_path, '', 10)
     let name = matchstr(line, pattern1)
     if !empty(name)
@@ -141,7 +143,7 @@ function! s:Jump_to_declaration(path) abort
   if s:endswith(expand(a:path), '.cmp')
     "echom 'Jump_to_declaration'
     call s:jump_from_cmp(a:path)
-  elseif s:endswith(expand(a:path), 'Controller.js')
+  elseif s:endswith(expand(a:path), '.js') 
     call s:jump_from_js_controller(a:path)
   endif
 endfunction
@@ -192,8 +194,9 @@ endfunction
 function! s:jump_from_js_controller(path) abort
   let line = getline('.')
   let method_name = s:matchstr_in_cursor(line, '"c\.\zs[a-zA-Z0-9_]\+\ze"')
+  "echom 's:jump_from_js_controller(path) method_name: ' . method_name
   if !empty(method_name)
-    call s:jump_to_apex_controller(expand(a:path), method_name)
+    call s:jump_to_apex_controller(a:path, method_name)
   else
     let method_name = s:matchstr_in_cursor(line, 'helper\.\zs.*\ze(')
     "echom 'helper.method_name: ' . method_name
@@ -204,7 +207,13 @@ function! s:jump_from_js_controller(path) abort
 endfunction
 
 function! s:jump_to_apex_controller(path, method_name)
-  let apex_controller_name = s:get_apex_controller_name(a:path)
+  let component_path = s:aura_component_path(a:path, '.cmp')
+  let apex_controller_name = s:get_apex_controller_name(component_path)
+  if empty(apex_controller_name)
+    return
+  endif
+
+  echom 's:jump_to_apex_controller(path, method_name) controller_name: ' . apex_controller_name
   let apex_controller_path = s:get_apex_controller_path(apex_controller_name)
   let line_num = s:line_of_apex_method_declaration(apex_controller_path, a:method_name)
   exe 'edit ' . apex_controller_path
