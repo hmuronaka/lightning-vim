@@ -96,9 +96,14 @@ function! s:is_lightning_directory(path, target)
 endfunction
 
 function! s:get_apex_controller_name(cmp_path)
-  let pattern = 'controller\s*=\s*"\%([^\.]\.\)\@<!\zs\([^\.]\+\)\ze"'
+  let pattern1 = 'controller\s*=\s*"[^\.]\+\.\zs\(.\+\)\ze"'
+  let pattern2 = 'controller\s*=\s*"\zs\(.\+\)\ze"'   
   for line in readfile(a:cmp_path, '', 10)
-    let name = matchstr(line, pattern)
+    let name = matchstr(line, pattern1)
+    if !empty(name)
+      return name
+    endif
+    let name = matchstr(line, pattern2)
     if !empty(name)
       return name
     endif
