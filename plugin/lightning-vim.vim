@@ -151,7 +151,7 @@ endfunction
 
 function! s:jump_from_cmp(path) abort
   let line = getline('.')
-  let method_name = matchstr(line, '{!c\.\zs.*\ze}')
+  let method_name = s:matchstr_in_cursor(line, '{!c\.\zs[a-zA-Z0-9_]\+\ze}')
   if !empty(method_name)
     echom 'method_name: ' . method_name
     call s:jump_to_js_controller(a:path, method_name)
@@ -191,11 +191,11 @@ endfunction
 
 function! s:jump_from_js_controller(path) abort
   let line = getline('.')
-  let method_name = matchstr(line, '"c\.\zs.*\ze"')
+  let method_name = s:matchstr_in_cursor(line, '"c\.\zs[a-zA-Z0-9_]\+\ze"')
   if !empty(method_name)
     call s:jump_to_apex_controller(expand(a:path), method_name)
   else
-    let method_name = matchstr(line, 'helper\.\zs.*\ze(')
+    let method_name = s:matchstr_in_cursor(line, 'helper\.\zs.*\ze(')
     "echom 'helper.method_name: ' . method_name
     if !empty(method_name)
       call s:jump_to_helper(a:path, method_name)
@@ -204,9 +204,9 @@ function! s:jump_from_js_controller(path) abort
 endfunction
 
 function! s:jump_to_apex_controller(path, method_name)
-  let apex_controller_name = s:get_apex_controller_name(path)
+  let apex_controller_name = s:get_apex_controller_name(a:path)
   let apex_controller_path = s:get_apex_controller_path(apex_controller_name)
-  let line_num = s:line_of_apex_method_declaration(apex_controller_path, method_name)
+  let line_num = s:line_of_apex_method_declaration(apex_controller_path, a:method_name)
   exe 'edit ' . apex_controller_path
 
   if line_num != -1
@@ -215,7 +215,7 @@ function! s:jump_to_apex_controller(path, method_name)
 endfunction
 
 function! s:line_of_apex_method_declaration(apex_path, method_name)
-  let pattern = '\s*' . method_name . '\s*\(.*\)\s*$'
+  let pattern = '\s*' . a:method_name . '\s*\(.*\)\s*$'
   let line_num = -1
   for line in readfile(a:apex_path, '')
     let name = matchstr(line, pattern)
@@ -237,8 +237,25 @@ function! s:jump_to_helper(path, method_name)
   endif
 endfunction
 
+function! s:matchstr_in_cursor(str, pattern)
+  let startPos = 0
+  let result_str = ''
+  while 1
+    let result = matchstrpos(a:str, a:pattern, startPos)
+    if empty(result[0])
+      let result_str = ''
+      break
+    endif
 
-
+    let column = col('.')
+    if result[1] <= column && column <= result[2]
+      let result_str = result[0]
+      break
+    endif
+    let startPos = result[2]
+  endwhile
+  return result_str
+endfunction
 
 function! s:lightning_setup()
   command! -bang -buffer -nargs=0 Rcontroller call s:change_to('%', 'Controller.js')
