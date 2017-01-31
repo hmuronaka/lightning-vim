@@ -141,7 +141,7 @@ function! s:Jump_to_declaration(path) abort
   if s:endswith(expand(a:path), '.cmp')
     "echom 'Jump_to_declaration'
     call s:jump_from_cmp(a:path)
-  elseif s:endswith(expand(a:path), '.Controller.js')
+  elseif s:endswith(expand(a:path), 'Controller.js')
     call s:jump_from_js_controller(a:path)
   endif
 endfunction
@@ -195,10 +195,10 @@ function! s:jump_from_js_controller(path) abort
   if !empty(method_name)
     call s:jump_to_apex_controller(expand(a:path), method_name)
   else
-    let method_name = matchstr(line, 'helper\.\zs.*\ze\s*\(')
-    echom 'helper.method_name: ' . method_name
+    let method_name = matchstr(line, 'helper\.\zs.*\ze(')
+    "echom 'helper.method_name: ' . method_name
     if !empty(method_name)
-      call s:jump_to_helper(expand(a:path), method_name)
+      call s:jump_to_helper(a:path, method_name)
     endif
   endif
 endfunction
