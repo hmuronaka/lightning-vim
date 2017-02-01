@@ -201,7 +201,7 @@ endfunction
 function! s:jump_to_cmp_attribute(path, attribute_name) abort
   let cmp_path = s:aura_component_path(a:path, '.cmp')
   "echom 'controller_path: ' . controller_path
-  let linenum = s:pos_of_cmp_attribute_declaration(cmp_path, a:attribute_name)
+  let linenum = s:line_of_cmp_attribute_declaration(cmp_path, a:attribute_name)
   "echom 'linenum: ' . linenum
   
   if linenum != -1
@@ -212,8 +212,8 @@ function! s:jump_to_cmp_attribute(path, attribute_name) abort
   " move line num
 endfunction
 
-function! s:pos_of_cmp_attribute_declaration(cmp_path, attribute_name)
-  echom 's:pos_of_cmp_attribute_declaration(cmp_path, attribute_name): ' . a:attribute_name
+function! s:line_of_cmp_attribute_declaration(cmp_path, attribute_name)
+  echom 's:line_of_cmp_attribute_declaration(cmp_path, attribute_name): ' . a:attribute_name
 
   let pattern ='aura:attribute\s\+.*\%(name\)\s*=\s*"' . a:attribute_name . '".*'
   let line_num = 1
