@@ -98,7 +98,7 @@ endfunction
 
 function! s:get_apex_controller_name(cmp_path)
   "echom 's:get_apex_controller_name(cmp_path) cmp_path: ' . a:cmp_path
-  let pattern1 = 'controller\s*=\s*"\([a-zA-Z0-9_]\+\.\)\?\zs[a-zA-Z0-9_]\+\ze"'
+  let pattern1 = 'controller\s*=\s*"\(\w\+\.\)\?\zs\w\+\ze"'
   for line in readfile(a:cmp_path, '', 10)
     let name = matchstr(line, pattern1)
     if !empty(name)
@@ -150,14 +150,14 @@ function! s:jump_from_cmp(path) abort
   let line = getline('.')
 
   " {!c.methodname}
-  let method_name = s:matchstr_in_cursor(line, '{!c\.\zs[a-zA-Z0-9_]\+\ze}')
+  let method_name = s:matchstr_in_cursor(line, '{!c\.\zs\w\+\ze}')
   if !empty(method_name)
     "echom 'method_name: ' . method_name
     call s:jump_to_js_controller(a:path, method_name)
   endif
 
   " {!v.data} {!v.data.a}
-  let attribute_name = s:matchstr_in_cursor(line, '\%(\<v\.\)\zs[a-zA-Z0-9_]\+\ze')
+  let attribute_name = s:matchstr_in_cursor(line, '\%(\<v\.\)\zs\w\+\ze')
   if !empty(attribute_name)
     echom 'attribute_name: ' . attribute_name
     call s:jump_to_cmp_attribute(a:path, attribute_name)
@@ -229,12 +229,12 @@ endfunction
 
 function! s:jump_from_js_controller(path) abort
   let line = getline('.')
-  let method_name = s:matchstr_in_cursor(line, '"c\.\zs[a-zA-Z0-9_]\+\ze"')
+  let method_name = s:matchstr_in_cursor(line, '"c\.\zs\w\+\ze"')
   "echom 's:jump_from_js_controller(path) method_name: ' . method_name
   if !empty(method_name)
     call s:jump_to_apex_controller(a:path, method_name)
   else
-    let method_name = s:matchstr_in_cursor(line, 'helper\.\zs[a-zA-Z0-9_]\+\ze')
+    let method_name = s:matchstr_in_cursor(line, 'helper\.\zs\w\+\ze')
     echom 'helper.method_name: ' . method_name
     if !empty(method_name)
       call s:jump_to_helper(a:path, method_name)
