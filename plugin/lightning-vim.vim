@@ -162,6 +162,12 @@ function! s:jump_from_cmp(path) abort
     echom 'attribute_name: ' . attribute_name
     call s:jump_to_cmp_attribute(a:path, attribute_name)
   endif
+
+  let component_name = s:matchstr_in_cursor(line,'\%(<\w\+:\)\zs\w\+\ze\s*')
+  if !empty(component_name)
+    echom 'component_name: ' . component_name
+    call s:jump_to_cmp(a:path, component_name)
+  endif
 endfunction
 
 function! s:jump_to_js_controller(path, method_name) abort
@@ -219,6 +225,14 @@ function! s:pos_of_cmp_attribute_declaration(cmp_path, attribute_name)
     let line_num += 1
   endfor
   return -1
+endfunction
+
+" Componentのcmpファイルにジャンプする
+function! s:jump_to_cmp(path, component_name) abort
+  let cmp_path = 'pkg/aura/' . a:component_name . '/' . a:component_name . '.cmp'
+  if filereadable(cmp_path)
+    exe 'edit ' . cmp_path
+  endif
 endfunction
 
 
