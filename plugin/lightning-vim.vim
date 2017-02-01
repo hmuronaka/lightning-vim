@@ -1,5 +1,6 @@
+" Reference rails-vim by Tim Pope
 " lightning-vim.vim - Detect a lightning-vim application
-" Author:       Tim Pope <http://tpo.pe/>
+" Author:       hmuronaka
 " GetLatestVimScripts: 1567 1 :AutoInstall: lightning-vim.vim
 
 " Install this file as plugin/lightning-vim.vim.
@@ -156,7 +157,7 @@ function! s:jump_from_cmp(path) abort
   endif
 
   " {!v.data} {!v.data.a}
-  let attribute_name = s:matchstr_in_cursor(line, '{!v\.\zs[a-zA-Z0-9_]\+\ze}')
+  let attribute_name = s:matchstr_in_cursor(line, '{!.*\%(\<v\.\)\zs[a-zA-Z0-9_]\+\ze.*}')
   if !empty(attribute_name)
     echom 'attribute_name: ' . attribute_name
     call s:jump_to_cmp_attribute(a:path, attribute_name)
