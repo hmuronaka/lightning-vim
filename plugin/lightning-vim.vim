@@ -247,13 +247,21 @@ function! s:jump_from_js_controller(path) abort
   "echom 's:jump_from_js_controller(path) method_name: ' . method_name
   if !empty(method_name)
     call s:jump_to_apex_controller(a:path, method_name)
-  else
-    let method_name = s:matchstr_in_cursor(line, 'helper\.\zs\w\+\ze')
-    echom 'helper.method_name: ' . method_name
-    if !empty(method_name)
-      call s:jump_to_helper(a:path, method_name)
-    endif
+    return
   endif
+
+  let method_name = s:matchstr_in_cursor(line, 'helper\.\zs\w\+\ze')
+  if !empty(method_name)
+    call s:jump_to_helper(a:path, method_name)
+    return
+  endif
+
+  let method_name = s:matchstr_in_cursor(line, 'self\.\zs\w\+\ze')
+  if !empty(method_name)
+    call s:jump_to_self(a:path, method_name)
+    return
+  endif
+  
 endfunction
 
 function! s:jump_to_apex_controller(path, method_name)
@@ -293,6 +301,13 @@ function! s:jump_to_helper(path, method_name)
     exe 'edit +' . line_num . ' ' . helper_path
   else
     exe 'edit ' . helper_path
+  endif
+endfunction
+
+function! s:jump_to_self(path, method_name)
+  let line_num = s:pos_of_js_method_declaration(expand(a:path), a:method_name)
+  if line_num != -1
+    exe line_num
   endif
 endfunction
 
