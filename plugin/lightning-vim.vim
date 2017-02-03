@@ -256,7 +256,7 @@ function! s:jump_from_js_controller(path) abort
     return
   endif
 
-  let method_name = s:matchstr_in_cursor(line, 'self\.\zs\w\+\ze')
+  let method_name = s:matchstr_in_cursor(line, '\%(self\|this\)\.\zs\w\+\ze')
   if !empty(method_name)
     call s:jump_to_self(a:path, method_name)
     return
