@@ -214,17 +214,8 @@ endfunction
 
 function! s:line_of_cmp_attribute_declaration(cmp_path, attribute_name)
   echom 's:line_of_cmp_attribute_declaration(cmp_path, attribute_name): ' . a:attribute_name
-
   let pattern ='aura:attribute\s\+.*\%(name\)\s*=\s*"' . a:attribute_name . '".*'
-  let line_num = 1
-  for line in readfile(a:cmp_path, '')
-    let name = matchstr(line, pattern)
-    if !empty(name)
-      return line_num
-    endif
-    let line_num += 1
-  endfor
-  return -1
+  return s:line_of_file(a:cmp_path, pattern)
 endfunction
 
 " Componentのcmpファイルにジャンプする
@@ -234,8 +225,6 @@ function! s:jump_to_cmp(path, component_name) abort
     exe 'edit ' . cmp_path
   endif
 endfunction
-
-
 
 
 """"""""""""""""""""""""""""""""""""""""
@@ -261,7 +250,6 @@ function! s:jump_from_js_controller(path) abort
     call s:jump_to_self(a:path, method_name)
     return
   endif
-  
 endfunction
 
 function! s:jump_to_apex_controller(path, method_name)
@@ -283,15 +271,7 @@ endfunction
 
 function! s:line_of_apex_method_declaration(apex_path, method_name)
   let pattern = '\s*' . a:method_name . '\s*\(.*\)\s*{\?\s*$'
-  let line_num = 1
-  for line in readfile(a:apex_path, '')
-    let name = matchstr(line, pattern)
-    if !empty(name)
-      return line_num
-    endif
-    let line_num += 1
-  endfor
-  return -1
+  return s:line_of_file(a:apex_path, pattern)
 endfunction
 
 function! s:jump_to_helper(path, method_name)
@@ -309,6 +289,18 @@ function! s:jump_to_self(path, method_name)
   if line_num != -1
     exe line_num
   endif
+endfunction
+
+function! s:line_of_file(path, pattern)
+  let line_num = 1
+  for line in readfile(a:path, '')
+    let name = matchstr(line, a:pattern)
+    if !empty(name)
+      return line_num
+    endif
+    let line_num += 1
+  endfor
+  return -1
 endfunction
 
 function! s:matchstr_in_cursor(str, pattern)
