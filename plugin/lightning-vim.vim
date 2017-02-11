@@ -14,15 +14,6 @@
 "
 let g:lightning_vim#enable_debug_log=1
 
-function! s:endswith(string,suffix)
-  return lightning_vim_util#endswith(a:string, a:suffix)
-endfunction
-
-function! s:matchstr_in_cursor(str, pattern)
-  return lightning_vim_util#matchstr_in_cursor(a:str, a:pattern)
-endfunction
-
-
 " }}}1
 " Detection {{{1
 
@@ -57,40 +48,22 @@ function! LightningDetect(...) abort
 endfunction
 
 " apexのcontrollerからlightningコンポーネントのベースパスを探す
-function! s:search_aura_dir(controller_name)
-  let base_aura_path = 'pkg/aura/**/*.cmp'
-  " auraの各パスの*.cmpを探索する
-  let filelist = glob(base_aura_path)
-  let splitted = split(filelist, '\n')
-  for file in splitted
-    let cmp_controller_name = s:get_apex_controller_name(file)
-    if !empty(cmp_controller_name)
-      echom file . ', ' . cmp_controller_name
-    endif
-  endfor
-endfunction
-
-"comp{suffix}ファイル名を取得する
-function! s:aura_component_path(path, suffix)
-  call lightning_vim_util#debug(expand('<sfile>'), 'path: ' . a:path . ', suffix: ' . a:suffix)
-
-  if s:is_lightning_directory(expand(a:path), 'pkg/aura/')
-    let dirname = expand(a:path . ':h')
-    let dirname = fnamemodify(dirname, ':t')
-    let curdir = expand(a:path .':p:h')
-    let aura_component_path = curdir . '/' . dirname . a:suffix
-    return aura_component_path
-  elseif s:is_lightning_directory(expand(a:path), 'pkg/classes/')
-    "call s:search_aura_dir('test')
-  endif
-  return ''
-endfunction
+"function! s:search_aura_dir(controller_name)
+"  let base_aura_path = 'pkg/aura/**/*.cmp'
+"  " auraの各パスの*.cmpを探索する
+"  let filelist = glob(base_aura_path)
+"  let splitted = split(filelist, '\n')
+"  for file in splitted
+"    let cmp_controller_name = s:get_apex_controller_name(file)
+"    if !empty(cmp_controller_name)
+"      echom file . ', ' . cmp_controller_name
+"    endif
+"  endfor
+"endfunction
 
 function! s:change_to(path, target)
-  let controller_path = s:aura_component_path(a:path, a:target)
-  if filereadable(controller_path)
-    exe 'edit ' . controller_path
-  endif
+  let component = lightning_component#create_from_path(expand(a:path))
+  call component.change_to(a:target)
 endfunction
 
 " pathが'pkg/aura/'など内のパスかどうか
@@ -98,194 +71,10 @@ function! s:is_lightning_directory(path, target)
   return stridx(a:path, a:target) != -1
 endfunction
 
-function! s:get_apex_controller_name(cmp_path)
-  call lightning_vim_util#debug(expand('<sfile>'), 'path: ' . a:cmp_path)
-
-  if !filereadable(a:cmp_path)
-    call lightning_vim_util#debug(expand('<sfile>'), 'file is not readable')
-    return ''
-  endif
-
-  let pattern = 'controller\s*=\s*\(["'']\)\(\w\+\.\)\?\zs\w\+\ze\1'
-  let result = lightning_vim_util#line_and_str_from_file(a:cmp_path, pattern, 10)
-
-  " matchした場合は、マッチした文字列を返す。
-  " matchしなかったら、''を返す。
-  return result[0]
-endfunction
-
-function! s:get_apex_controller_path(apex_controller_name)
-  let apex_controller_path = 'pkg/classes/' . a:apex_controller_name . '.cls'
-  return apex_controller_path
-endfunction
-
-function! s:change_to_apex(path)
-  "当該cmpの存在チェック
-  let cmp_path = s:aura_component_path(a:path, '.cmp')
-  let file = findfile(cmp_path, '.')
-  if empty(file)
-    return 0
-  endif
-
-  "cmp読み込み
-  "controller="class名"をチェック
-  let apex_controller_name = s:get_apex_controller_name(cmp_path)
-  if empty(apex_controller_name)
-    return 0
-  endif
-  
-  "ヒットしたら、そのクラス名のファイルに遷移する
-  echo apex_controller_name
-  let apex_controller_path = s:get_apex_controller_path(apex_controller_name)
-  exe 'edit ' . apex_controller_path
-endfunction
-
 function! s:Jump_to_declaration(path) abort
   call lightning_vim_util#debug(expand('<sfile>'), 'path:' . a:path)
-  if s:endswith(expand(a:path), '.cmp')
-    call s:jump_from_cmp(a:path)
-  elseif s:endswith(expand(a:path), '.js') 
-    call s:jump_from_js_controller(a:path)
-  else
-    call lightning_vim_util#debug(expand('<sfile>'), 'not match')
-  endif
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""
-" jump_fromp_cmp
-
-function! s:jump_from_cmp(path) abort
-  call lightning_vim_util#debug(expand('<sfile>'), 'path: ' .  a:path)
-  let line = getline('.')
-
-  let method_name = s:matchstr_in_cursor(line, '\<c\.\zs\w\+\ze')
-  if !empty(method_name)
-    call s:jump_to_js(a:path, 'Controller.js', method_name)
-  endif
-
-  " {!v.data} {!v.data.a}
-  let attribute_name = s:matchstr_in_cursor(line, '\%(\<v\.\)\zs\w\+\ze')
-  if !empty(attribute_name)
-    call s:jump_to_cmp_attribute(a:path, attribute_name)
-  endif
-
-  let component_name = s:matchstr_in_cursor(line,'\%(<\w\+:\)\zs\w\+\ze\s*')
-  if !empty(component_name)
-    call s:jump_to_cmp(a:path, component_name)
-  endif
-
-  call lightning_vim_util#debug(expand('<sfile>'), 'not match line: ' . line)
-endfunction
-
-" suffixを'self'にした場合は、自身のファイルに飛ぶ
-function! s:jump_to_js(path, suffix, method_name) abort
-  call lightning_vim_util#debug(expand('<sfile>'), ' path: ' . a:path . ', suffix: ' . a:suffix . ', method_name: ' . a:method_name)
-
-  if a:suffix != 'self'
-    let controller_path = s:aura_component_path(a:path, a:suffix)
-  else
-    " 自身のファイルにジャンプする
-    " NOTE 実装ミス %の展開箇所を見直す必要がある。
-    let controller_path = expand(a:path)
-  endif
-
-  let linenum = s:line_of_declaration(controller_path, 'js_method', a:method_name)
-  
-  if linenum != -1
-    if a:suffix == 'self'
-      exe linenum
-    else
-      exe 'edit +' . linenum . ' ' . controller_path
-    endif
-  else
-    if a:suffix != 'self'
-      exe 'edit ' . controller_path
-    endif
-  endif
-  " move line num
-endfunction
-
-function! s:jump_to_cmp_attribute(path, attribute_name) abort
-  let cmp_path = s:aura_component_path(a:path, '.cmp')
-  let linenum = s:line_of_declaration(cmp_path, 'cmp_attribute', a:attribute_name)
-  
-  if linenum != -1
-    exe 'edit +' . linenum . ' ' . cmp_path
-  else
-    exe 'edit ' . cmp_path
-  endif
-  " move line num
-endfunction
-
-" Componentのcmpファイルにジャンプする
-function! s:jump_to_cmp(path, component_name) abort
-  let cmp_path = 'pkg/aura/' . a:component_name . '/' . a:component_name . '.cmp'
-  if filereadable(cmp_path)
-    exe 'edit ' . cmp_path
-  endif
-endfunction
-
-
-function! s:line_of_declaration(controller_path, pattern_type, name)
-  let pattern = ''
-  if a:pattern_type == 'js_method'
-    let pattern = '^\s*' . a:name . '\s*\:\s*function'
-  elseif a:pattern_type == 'cmp_attribute'
-    let pattern ='aura:attribute\s\+.*\%(name\)\s*=\s*"' . a:name . '".*'
-  elseif a:pattern_type == 'apex_method'
-    let pattern = '\s*' . a:name . '\s*\(.*\)\s*{\?\s*$'
-  else
-    call lightning_vim_util#error(expand('<sfile>'), 'invalid pattern type: ' . a:pattern_type)
-  endif
-
-  return lightning_vim_util#line_from_file(a:controller_path, pattern)
-endfunction
-
-""""""""""""""""""""""""""""""""""""""""
-" jump_from_js_controller
-
-function! s:jump_from_js_controller(path) abort
-  call lightning_vim_util#debug(expand('<sfile>'), 'path: ' . a:path)
-
-  let line = getline('.')
-  let method_name = s:matchstr_in_cursor(line, '\(["'']\)c\.\zs\w\+\ze\1')
-  if !empty(method_name)
-    call s:jump_to_apex_controller(a:path, method_name)
-    return
-  endif
-
-  let method_name = s:matchstr_in_cursor(line, 'helper\.\zs\w\+\ze')
-  if !empty(method_name)
-    call s:jump_to_js(a:path, 'Helper.js', method_name)
-    return
-  endif
-
-  let method_name = s:matchstr_in_cursor(line, '\%(self\|this\)\.\zs\w\+\ze')
-  if !empty(method_name)
-    call s:jump_to_js(a:path, 'self', method_name)
-    return
-  endif
-
-  call lightning_vim_util#debug(expand('<sfile>'), 'not_match line: ' . line)
-endfunction
-
-function! s:jump_to_apex_controller(path, method_name)
-  call lightning_vim_util#debug(expand('<sfile>'), 'path: ' . a:path . ', method_name: ' . a:method_name)
-
-  let component_path = s:aura_component_path(a:path, '.cmp')
-  let apex_controller_name = s:get_apex_controller_name(component_path)
-  if empty(apex_controller_name)
-    call lightning_vim_util#debug(expand('<sfile>'), 'apex_controller not found from: ' . component_path)
-    return
-  endif
-
-  let apex_controller_path = s:get_apex_controller_path(apex_controller_name)
-  let line_num = s:line_of_declaration(apex_controller_path, 'apex_method', a:method_name)
-  exe 'edit ' . apex_controller_path
-
-  if line_num != -1
-    exe line_num
-  endif
+  let component = lightning_component#create_from_path(expand(a:path))
+  call component.jump_to(getline('.'))
 endfunction
 
 function! s:lightning_setup()
@@ -294,7 +83,7 @@ function! s:lightning_setup()
   command! -bang -buffer -nargs=0 Rhelper call s:change_to('%', 'Helper.js')
   command! -bang -buffer -nargs=0 Rcmp call s:change_to('%', '.cmp')
   command! -bang -buffer -nargs=0 Rrender call s:change_to('%', 'Renderer.js')
-  command! -bang -buffer -nargs=0 Rapex call s:change_to_apex('%')
+  command! -bang -buffer -nargs=0 Rapex call s:change_to('%', 'apex')
 
   let pattern = '^$'
   if mapcheck('gf', 'n') =~# pattern

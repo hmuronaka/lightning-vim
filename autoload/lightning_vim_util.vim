@@ -67,7 +67,20 @@ function! lightning_vim_util#line_from_file(path, pattern)
   return -1
 endfunction
 
+function! lightning_vim_util#edit(path, line_num)
+  if !filereadable(a:path)
+    call lightning_vim_util#debug('file isn''t readable. path: ' . a:path)
+    return 0
+  endif
 
+  if a:line_num != -1
+    exe 'edit+' . a:line_num . ' ' . a:path
+  else
+    exe 'edit ' . a:path
+  endif
+
+  return 1
+endfunction
 
 """"""""""""""""""""""""""""""""""""""""
 " string
