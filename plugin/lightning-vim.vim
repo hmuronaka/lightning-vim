@@ -1,9 +1,6 @@
-" Reference rails-vim by Tim Pope
-" lightning-vim.vim - Detect a lightning-vim application
+" lightning-vim.vim 
 " Author:       hmuronaka
 " GetLatestVimScripts: 1567 1 :AutoInstall: lightning-vim.vim
-
-" Install this file as plugin/lightning-vim.vim.
 
 "if exists('g:loaded_lightning') || &cp || v:version < 700
 "  finish
@@ -18,33 +15,29 @@ let g:lightning_vim#enable_debug_log=1
 " Detection {{{1
 
 function! LightningDetect(...) abort
-  echom "A"
+  call lightning_vim_util#debug(expand('<sfile>'), 'a: '. a:0 ? a:1 : '')
   if exists('b:lightning_root')
     return 1
   endif
 
   let fn = fnamemodify(a:0 ? a:1 : expand('%'), ':p')
+  call lightning_vim_util#debug(expand('<sfile>'), 'fn: ' . fn)
   if fn =~# ':[\/]\{2\}'
     return 0
   endif
 
-  echom fn
   if !isdirectory(fn)
     let fn = fnamemodify(fn, ':h')
   endif
 
   let file = findfile('appConfig.json', escape(fn, ', ').';')
-  echom file
-  if !empty(file) && isdirectory(fnamemodify(file, ':p:h') . '/pkg')
-    let b:lightning_root = fnamemodify(file, ':p:h')
+  let base_dir = fnamemodify(file, ':p:h')
+  call lightning_vim_util#debug(expand('<sfile>'), 'base_dir: ' . base_dir)
+  if !empty(file) && isdirectory(base_dir . '/pkg')
+    let b:lightning_root = base_dir
+    call lightning_vim_util#debug(expand('<sfile>'), 'root: ' . b:lightning_root)
     return 1
   endif
-"  let file = findfile('appConfig.json', ".")
-"  let temp = isdirectory(fnamemodify(file, ':p:h') . '/pkg')
-"  if !empty(file) && isdirectory(fnamemodify(file, ':p:h') . '/pkg')
-"    let b:lightning_root = fnamemodify(file, ':p:h')
-"    return 1
-"  endif
 endfunction
 
 " apexのcontrollerからlightningコンポーネントのベースパスを探す
@@ -64,11 +57,6 @@ endfunction
 function! s:change_to(path, target)
   let component = lightning_component#create_from_path(expand(a:path))
   call component.change_to(a:target)
-endfunction
-
-" pathが'pkg/aura/'など内のパスかどうか
-function! s:is_lightning_directory(path, target)
-  return stridx(a:path, a:target) != -1
 endfunction
 
 function! s:Jump_to_declaration(path) abort
@@ -102,24 +90,6 @@ augroup END
 
 call s:lightning_setup()
 
-"augroup lightningPluginDetect
-"  autocmd!
-"  autocmd BufNewFile, BufReadPost * 
-"    \ echom 'BufNewFile, BufReadPost' |
-"    \ if LightningDetect('<afile>')  |
-"    \   echom 'LightningDetected' |
-"    \  call s:lightning_setup()  |
-"    \ endif
-"
-"  autocmd VimEnter *
-"    \ echom 'VimEnter'
-"
-"augroup END
-
-
-
-" }}}1
-" Initialization {{{1
 
 "if !exists('g:did_load_ftplugin')
 "  filetype plugin on
