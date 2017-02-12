@@ -133,7 +133,7 @@ function! s:lightning_component.jump_to_cmp_attribute(attribute_name) dict abort
   call lightning_vim_util#debug(expand('<sfile>'), 'attribute_name: ' . a:attribute_name)
 
   let cmp_path = self.get_path('.cmp')
-  let pattern = s:pattern('cmp_attibute', a:attribute_name)
+  let pattern = s:pattern('cmp_attribute', a:attribute_name)
   let linenum = lightning_vim_util#line_from_file(cmp_path, pattern)
   call lightning_vim_util#edit(cmp_path, linenum)
 endfunction
@@ -169,9 +169,9 @@ function! s:pattern(pattern_type, name)
   if a:pattern_type == 'js_method'
     let pattern = '^\s*' . a:name . '\s*\:\s*function'
   elseif a:pattern_type == 'cmp_attribute'
-    let pattern ='aura:attribute\s\+.*\%(name\)\s*=\s*"' . a:name . '".*'
+    let pattern ='aura:attribute\s\+.*\%(name\)\s*=\s*\(["'']\)' . a:name . '\1.*'
   else
-    call lightning_vim_util#error(expand('<sfile>'), 'invalid pattern_type. ' . a:pattern_type . ', name: ' . name)
+    call lightning_vim_util#error(expand('<sfile>'), 'invalid pattern_type. ' . a:pattern_type . ', name: ' . a:name)
   endif
   return pattern
 endfunction

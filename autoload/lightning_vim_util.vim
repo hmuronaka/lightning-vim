@@ -18,7 +18,8 @@ function! lightning_vim_util#debug(expanded_sfile, msg)
 endfunction
 
 function s:method_name(expanded_sfile)
-  return substitute(a:expanded_sfile, '.*\(\.\.\|\s\)', '', '')
+  "return substitute(a:expanded_sfile, '.*\(\.\.\|\s\)', '', '')
+  return a:expanded_sfile
 endfunction
 
 """"""""""""""""""""""""""""""""""""""""
