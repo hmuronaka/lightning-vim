@@ -55,27 +55,27 @@ endfunction
 "endfunction
 
 function! s:change_to(path, target)
-  let component = lightning_component#create_from_path(expand(a:path))
+  let component = lightning_component#create_from_path(a:path)
   call component.change_to(a:target)
 endfunction
 
 function! s:Jump_to_declaration(path) abort
   call lightning_vim_util#debug(expand('<sfile>'), 'path:' . a:path)
-  let component = lightning_component#create_from_path(expand(a:path))
+  let component = lightning_component#create_from_path(a:path)
   call component.jump_to(getline('.'))
 endfunction
 
-function! s:lightning_setup()
-  command! -bang -buffer -nargs=0 Rcontroller call s:change_to('%', 'Controller.js')
-  command! -bang -buffer -nargs=0 Rcss call s:change_to('%', '.css')
-  command! -bang -buffer -nargs=0 Rhelper call s:change_to('%', 'Helper.js')
-  command! -bang -buffer -nargs=0 Rcmp call s:change_to('%', '.cmp')
-  command! -bang -buffer -nargs=0 Rrender call s:change_to('%', 'Renderer.js')
-  command! -bang -buffer -nargs=0 Rapex call s:change_to('%', 'apex')
+function! LightningSetup(path)
+  command! -bang -buffer -nargs=0 Rcontroller call s:change_to(a:path, 'Controller.js')
+  command! -bang -buffer -nargs=0 Rcss call s:change_to(a:path, '.css')
+  command! -bang -buffer -nargs=0 Rhelper call s:change_to(a:path, 'Helper.js')
+  command! -bang -buffer -nargs=0 Rcmp call s:change_to(a:path, '.cmp')
+  command! -bang -buffer -nargs=0 Rrender call s:change_to(a:path, 'Renderer.js')
+  command! -bang -buffer -nargs=0 Rapex call s:change_to(a:path, 'apex')
 
   let pattern = '^$'
   if mapcheck('gf', 'n') =~# pattern
-    nmap <buffer> <SID>JumpToDeclaration :call <SID>Jump_to_declaration('%')<CR>
+    nmap <buffer> <SID>JumpToDeclaration :call <SID>Jump_to_declaration(expand('%'))<CR>
     nmap <buffer> <Plug>JumpToDeclaration <SID>JumpToDeclaration
     nmap <buffer> gf <Plug>JumpToDeclaration
   endif
@@ -83,95 +83,13 @@ endfunction
 
 augroup lightningPluginDetect
   autocmd!
-  autocmd BufNewFile call s:lightning_setup
-  autocmd BufReadPost * call s:lightning_setup()
-  autocmd VimEnter * call s:lightning_setup()
+  autocmd BufNewFile,BufReadPost *
+    \ if LightningDetect(expand("<afile>:p")) |
+    \   call LightningSetup(expand("<afile>")) |
+    \ endif
+  autocmd VimEnter * 
+    \ if empty(expand("<amatch>")) && LightningDetect(getcwd()) |
+    \   call lightning_vim_util#debug('VimEnter', 'afile: ' . expand('<afile>')) |
+    \   call LightningSetup(expand("<afile>")) |
+    \ endif
 augroup END
-
-call s:lightning_setup()
-
-
-"if !exists('g:did_load_ftplugin')
-"  filetype plugin on
-"endif
-"if !exists('g:loaded_projectionist')
-"  runtime! plugin/projectionist.vim
-"endif
-
-"augroup railsPluginDetect
-"  autocmd!
-"  autocmd BufEnter * if exists("b:rails_root")|silent doau User BufEnterRails|endif
-"  autocmd BufLeave * if exists("b:rails_root")|silent doau User BufLeaveRails|endif
-"
-"  autocmd BufNewFile,BufReadPost *
-"        \ if RailsDetect(expand("<afile>:p")) && empty(&filetype) |
-"        \   call rails#buffer_setup() |
-"        \ endif
-"  autocmd VimEnter *
-"        \ if empty(expand("<amatch>")) && RailsDetect(getcwd()) |
-"        \   call rails#buffer_setup() |
-"        \   silent doau User BufEnterRails |
-"        \ endif
-"  autocmd FileType netrw
-"        \ if RailsDetect() |
-"        \   silent doau User BufEnterRails |
-"        \ endif
-"  autocmd FileType * if RailsDetect() | call rails#buffer_setup() | endif
-"
-"  autocmd BufNewFile,BufReadPost *.yml.example set filetype=yaml
-"  autocmd BufNewFile,BufReadPost *.rjs,*.rxml,*.builder,*.jbuilder,*.ruby
-"        \ if &filetype !=# 'ruby' | set filetype=ruby | endif
-"  autocmd BufReadPost *.log if RailsDetect() | set filetype=railslog | endif
-"
-"  autocmd FileType railslog call rails#log_setup()
-"  autocmd Syntax railslog call rails#log_syntax()
-"  autocmd Syntax ruby,eruby,yaml,haml,javascript,coffee,sass,scss
-"        \ if RailsDetect() | call rails#buffer_syntax() | endif
-"
-"  autocmd User ProjectionistDetect
-"        \ if RailsDetect(get(g:, 'projectionist_file', '')) |
-"        \   call projectionist#append(b:rails_root,
-"        \     {'*': {"start": rails#app().static_rails_command('server')}}) |
-"        \ endif
-"augroup END
-"
-"command! -bar -bang -nargs=* -complete=customlist,rails#complete_rails Rails execute rails#new_app_command(<bang>0,<f-args>)
-"
-"" }}}1
-"" abolish.vim support {{{1
-"
-"function! s:function(name)
-"    return function(substitute(a:name,'^s:',matchstr(expand('<sfile>'), '<SNR>\d\+_'),''))
-"endfunction
-"
-"augroup railsPluginAbolish
-"  autocmd!
-"  autocmd VimEnter * call s:abolish_setup()
-"augroup END
-"
-"function! s:abolish_setup()
-"  if exists('g:Abolish') && has_key(g:Abolish,'Coercions')
-"    if !has_key(g:Abolish.Coercions,'l')
-"      let g:Abolish.Coercions.l = s:function('s:abolish_l')
-"    endif
-"    if !has_key(g:Abolish.Coercions,'t')
-"      let g:Abolish.Coercions.t = s:function('s:abolish_t')
-"    endif
-"  endif
-"endfunction
-"
-"function! s:abolish_l(word)
-"  let singular = rails#singularize(a:word)
-"  return a:word ==? singular ? rails#pluralize(a:word) : singular
-"endfunction
-"
-"function! s:abolish_t(word)
-"  if a:word =~# '\u'
-"    return rails#pluralize(rails#underscore(a:word))
-"  else
-"    return rails#singularize(rails#camelize(a:word))
-"  endif
-"endfunction
-"
-"" }}}1
-"" vim:set sw=2 sts=2:
