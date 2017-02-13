@@ -72,7 +72,6 @@ function! LightningSetup(path)
   command! -bang -buffer -nargs=0 Rcmp call s:change_to(a:path, '.cmp')
   command! -bang -buffer -nargs=0 Rrender call s:change_to(a:path, 'Renderer.js')
   command! -bang -buffer -nargs=0 Rapex call s:change_to(a:path, 'apex')
->>>>>>> 88b4ccf11ee16bf00e6fdd5d8d7e3f26d6b5cd5e
 
   let pattern = '^$'
   if mapcheck('gf', 'n') =~# pattern
