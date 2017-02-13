@@ -65,13 +65,13 @@ function! s:Jump_to_declaration(path) abort
   call component.jump_to(getline('.'))
 endfunction
 
-function! LightningSetup(path)
-  command! -bang -buffer -nargs=0 Rcontroller call s:change_to(a:path, 'Controller.js')
-  command! -bang -buffer -nargs=0 Rcss call s:change_to(a:path, '.css')
-  command! -bang -buffer -nargs=0 Rhelper call s:change_to(a:path, 'Helper.js')
-  command! -bang -buffer -nargs=0 Rcmp call s:change_to(a:path, '.cmp')
-  command! -bang -buffer -nargs=0 Rrender call s:change_to(a:path, 'Renderer.js')
-  command! -bang -buffer -nargs=0 Rapex call s:change_to(a:path, 'apex')
+function! LightningSetup()
+  command! -bang -buffer -nargs=0 Rcontroller call s:change_to(expand('%') , 'Controller.js')
+  command! -bang -buffer -nargs=0 Rcss call s:change_to(expand('%'), '.css')
+  command! -bang -buffer -nargs=0 Rhelper call s:change_to(expand('%'), 'Helper.js')
+  command! -bang -buffer -nargs=0 Rcmp call s:change_to(expand('%'), '.cmp')
+  command! -bang -buffer -nargs=0 Rrender call s:change_to(expand('%'), 'Renderer.js')
+  command! -bang -buffer -nargs=0 Rapex call s:change_to(expand('%'), 'apex')
 
   let pattern = '^$'
   if mapcheck('gf', 'n') =~# pattern
@@ -85,11 +85,11 @@ augroup lightningPluginDetect
   autocmd!
   autocmd BufNewFile,BufReadPost *
     \ if LightningDetect(expand("<afile>:p")) |
-    \   call LightningSetup(expand("<afile>")) |
+    \   call LightningSetup() |
     \ endif
   autocmd VimEnter * 
     \ if empty(expand("<amatch>")) && LightningDetect(getcwd()) |
     \   call lightning_vim_util#debug('VimEnter', 'afile: ' . expand('<afile>')) |
-    \   call LightningSetup(expand("<afile>")) |
+    \   call LightningSetup() |
     \ endif
 augroup END
