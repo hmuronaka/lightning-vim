@@ -9,7 +9,7 @@
 
 " Utility Functions {{{1
 "
-let g:lightning_vim#enable_debug_log=1
+let g:lightning_vim#enable_debug_log=0
 
 " }}}1
 " Detection {{{1
