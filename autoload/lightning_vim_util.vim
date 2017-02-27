@@ -74,12 +74,20 @@ function! lightning_vim_util#edit(path, line_num)
     return 0
   endif
 
-  if a:line_num != -1
-    exe 'edit+' . a:line_num . ' ' . a:path
+  " 同じファイルかのチェックは未検証
+  if expand('%:p') == a:path
+    if a:line_num != -1
+      exe 'normal ' . a:line_num . 'G'
+    else
+      return 0
+    end
   else
-    exe 'edit ' . a:path
-  endif
-
+    if a:line_num != -1
+      exe 'edit+' . a:line_num . ' ' . a:path
+    else
+      exe 'edit ' . a:path
+    endif
+  end
   return 1
 endfunction
 

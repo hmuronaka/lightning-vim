@@ -124,7 +124,7 @@ function! s:lightning_component.jump_to_js(method_name, suffix) dict abort
     call lightning_vim_util#edit(controller_path, linenum)
   else
     if linenum != -1
-      exe linenum
+      exe 'normal ' . linenum . 'G'
     endif
   endif
 endfunction
