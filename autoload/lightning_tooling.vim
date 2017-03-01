@@ -1,5 +1,5 @@
-let s:lightning_tooling_vim = {}
-function! lightning_tooling_vim#create(deploy_json_path)
+let s:lightning_tooling = {}
+function! lightning_tooling#create(deploy_json_path)
   let deploy_json_str = readfile(a:deploy_json_path)
   let deploy_json = json_decode(deploy_json_str)
 
@@ -10,6 +10,16 @@ function! lightning_tooling_vim#create(deploy_json_path)
   return obj
 endfunction
 
-function! lightning_tooling_vim.executeAnonymous()
-
+function! s:lightning_tooling.executeAnonymous() dict abort
 endfunction
+
+function! lightning_tooling#execute(params) abort
+  if empty(g:apex_tooling_force_dot_com_path)
+    return
+  endif
+
+  let cmd = 'java -jar ' . g:apex_tooling_force_dot_com_path
+  call vimproc#cmd#system(cmd)
+endfunction
+
+
