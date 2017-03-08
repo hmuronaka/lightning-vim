@@ -81,6 +81,23 @@ function! s:gulp_watch()
   call win_gotoid(current_winid)
 endfunction
 
+function! s:gulp_deploy()
+  let current_winid = win_getid()
+
+  " vimshellのwindowがない場合は開く
+  let buffer_name = '[vimshell] - default'
+  if bufwinid(buffer_name) == -1
+    exe 'bo 10split'
+  endif
+ 
+  exe 'VimShell'
+  exe 'VimShellSendString gulp deploy'
+
+  " 元のwindowに戻る
+  call win_gotoid(current_winid)
+endfunction
+
+
 function! LightningSetup()
   command! -bang -buffer -nargs=0 Rcontroller call s:change_to(expand('%') , 'Controller.js')
   command! -bang -buffer -nargs=0 Rcss call s:change_to(expand('%'), '.css')
@@ -89,6 +106,7 @@ function! LightningSetup()
   command! -bang -buffer -nargs=0 Rrender call s:change_to(expand('%'), 'Renderer.js')
   command! -bang -buffer -nargs=0 Rapex call s:change_to(expand('%'), 'apex')
   command! -bang -buffer -nargs=0 Rwatch call s:gulp_watch()
+  command! -bang -buffer -nargs=0 Rdeploy call s:gulp_deploy()
 
   let pattern = '^$'
   if mapcheck('gf', 'n') =~# pattern
