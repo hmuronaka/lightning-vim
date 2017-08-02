@@ -65,6 +65,10 @@ function! s:Jump_to_declaration(path) abort
   call component.jump_to(getline('.'))
 endfunction
 
+function! s:show_document(name) abort
+  exe '!apexdoc ' . a:name
+endfunction
+
 function! s:gulp_watch()
   let current_winid = win_getid()
 
@@ -107,6 +111,7 @@ function! LightningSetup()
   command! -bang -buffer -nargs=0 Rapex call s:change_to(expand('%'), 'apex')
   command! -bang -buffer -nargs=0 Rwatch call s:gulp_watch()
   command! -bang -buffer -nargs=0 Rdeploy call s:gulp_deploy()
+  command! -bang -buffer -nargs=1 Rdoc call s:show_document(<f-args>)
 
   let pattern = '^$'
   if mapcheck('gf', 'n') =~# pattern
