@@ -87,7 +87,8 @@ function! s:lightning_component.jump_from_js(line) dict abort
         \ {'pattern': '\(["'']\)c\.\zs\w\+\ze\1', 'function': 'jump_to_apex_controller'},
         \ {'pattern': 'helper\.\zs\w\+\ze', 'function': 'jump_to_js_helper'},
         \ {'pattern': '\%(self\|this\)\.\zs\w\+\ze', 'function': 'jump_to_js_self'},
-        \ {'pattern': '\%(\<v\.\)\zs\w\+\ze', 'function': 'jump_to_cmp_attribute'}
+        \ {'pattern': '\%(\<v\.\)\zs\w\+\ze', 'function': 'jump_to_cmp_attribute'},
+        \ {'pattern': '\%(\w\+:\)\zs\w\+\ze\s*', 'function': 'jump_to_cmp'}
         \ ]
 
    for pattern in patterns
