@@ -65,6 +65,20 @@ function! s:Jump_to_declaration(path) abort
   call component.jump_to(getline('.'))
 endfunction
 
+function! s:Open_declaration_to_splitview(path) abort
+  call lightning_vim_util#debug(expand('<sfile>'), 'path:' . a:path)
+  let component = lightning_component#create_from_path(a:path)
+  let current_winid = win_getid()
+  let current_line = getline('.')
+  wincmd l
+  if current_winid != win_getid()
+    close
+  endif
+  vsplit
+  wincmd l
+  call component.jump_to(current_line)
+endfunction
+
 function! s:show_document(name) abort
   exe '!apexdoc ' . a:name
 endfunction
@@ -118,6 +132,12 @@ function! LightningSetup()
     nmap <buffer> <SID>JumpToDeclaration :call <SID>Jump_to_declaration(expand('%'))<CR>
     nmap <buffer> <Plug>JumpToDeclaration <SID>JumpToDeclaration
     nmap <buffer> gf <Plug>JumpToDeclaration
+  endif
+
+  if mapcheck('gs', 'n') =~# pattern
+    nmap <buffer> <SID>OpenDeclarationToSplitView :call <SID>Open_declaration_to_splitview(expand('%'))<CR>
+    nmap <buffer> <Plug>OpenDeclarationToSplitView <SID>OpenDeclarationToSplitView
+    nmap <buffer> gs <Plug>OpenDeclarationToSplitView
   endif
 endfunction
 
